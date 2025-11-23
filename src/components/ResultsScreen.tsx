@@ -59,6 +59,23 @@ const SpiderChart = ({ feedback }: { feedback: QuestionFeedback[] }) => {
         const p = pointFor(item.score, i);
         return <circle key={item.id} cx={p.x} cy={p.y} r={5} fill="#a15df5" stroke="#fff" strokeWidth="2" />;
       })}
+      {feedback.map((item, i) => {
+        const end = pointFor(1.04, i); // iets buiten de cirkel voor label
+        return (
+          <text
+            key={`label-${item.id}`}
+            x={end.x}
+            y={end.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="10"
+            fill="#4a2d82"
+            fontWeight="700"
+          >
+            {item.id}
+          </text>
+        );
+      })}
       <defs>
         <linearGradient id="grad" x1="0" x2="1" y1="0" y2="1">
           <stop offset="0%" stopColor="#a15df5" stopOpacity="0.32" />
@@ -122,7 +139,7 @@ const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }
               <li key={item.id} className="flex items-center justify-between">
                 <span>{item.title}</span>
                 <span className="rounded-full bg-lightPurpleBg px-2 py-1 text-xs font-semibold text-primaryPurple">
-                  {item.displayLabel ?? `Score: ${Math.round(item.score * 100)}%`}
+                  #{item.id}
                 </span>
               </li>
             ))}
@@ -137,9 +154,6 @@ const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }
             className="glass-card h-full rounded-2xl border border-white/60 px-4 py-4 shadow-card"
           >
             <p className="text-sm font-semibold text-darkPurple">{item.title}</p>
-            <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-lightPurpleBg px-3 py-1 text-xs font-semibold text-primaryPurple">
-              {item.displayLabel ?? `Score: ${Math.round(item.score * 100)}%`}
-            </p>
             <p className="mt-2 text-sm text-grayText">{item.feedback}</p>
           </div>
         ))}

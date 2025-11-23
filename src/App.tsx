@@ -147,7 +147,8 @@ const App = () => {
     const recommendation = goodCount >= 4 ? 'advanced' : 'webinar';
     const fb: QuestionFeedback[] = selfScanItems.map((item) => {
       const rating = selfScanScores[item.id];
-      const normalized = Math.max(0, Math.min(1, rating / 3));
+      // Map 1,2,3 to 0,0.5,1 so "2" valt netjes in het midden van het spinnenweb.
+      const normalized = Math.max(0, Math.min(1, (rating - 1) / 2));
       const label = rating === 3 ? 'Sterk' : rating === 2 ? 'Redelijk' : 'Beginner';
       return {
         id: item.id,
