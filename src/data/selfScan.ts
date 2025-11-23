@@ -9,17 +9,17 @@ export const selfScanItems: SelfScanItem[] = [
   {
     id: 1,
     theme: 'Hoe werkt generatieve AI?',
-    statement: 'Ik kan helder uitleggen dat een LLM patronen voorspelt zonder echte begrip of broncontrole.',
+    statement: 'Ik weet hoe een LLM werkt en kan dat helder aan een collega uitleggen.',
   },
   {
     id: 2,
     theme: 'Prompting',
-    statement: 'Ik schrijf prompts met rol, doel, context en duidelijke instructies (en voorbeelden).',
+    statement: 'Ik weet hoe ik een goede prompt moet opbouwen.',
   },
   {
     id: 3,
     theme: 'Custom chatbots',
-    statement: 'Ik weet hoe je een chatbot bouwt met eigen data (RAG/fine-tune) én onderwijsdoelen.',
+    statement: 'Ik weet hoe ik een custom chatbot bouw en hoe ik custom instructions vormgeef.',
   },
   {
     id: 4,
@@ -34,11 +34,12 @@ export const selfScanItems: SelfScanItem[] = [
   {
     id: 6,
     theme: 'AI-ready toetsing',
-    statement: 'Ik kan een verslag/toets AI-ready maken met processtappen en reflectie (AI als hulpmiddel).',
+    statement: 'Ik kan een toets AI-ready maken.',
   },
   {
     id: 7,
     theme: 'Beperkingen & toekomst',
-    statement: 'Ik ken meerdere beperkingen van AI (hallucinatie, bias, geen wereldmodel, etc.).',
+    statement:
+      'Ik kan de beperkingen/nadelen van generatieve AI uitleggen: bias, hallucineren, cognitive offloading, privacy.',
   },
 ];

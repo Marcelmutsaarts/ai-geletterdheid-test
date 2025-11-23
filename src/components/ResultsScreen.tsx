@@ -81,7 +81,7 @@ const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }
         : 'Je zelfscan laat 0-3 sterke thema’s zien. De webinar-serie geeft je een stevig fundament.';
   const cta = advanced
     ? { text: 'Bekijk gevorderde cursus', href: '/advanced' }
-    : { text: 'Volg de webinar-serie', href: '/webinars' };
+    : { text: 'Volg de webinar-serie', href: 'https://aivoordocenten.nl/webinarserie-ai-in-het-onderwijs/' };
 
   return (
     <motion.section
