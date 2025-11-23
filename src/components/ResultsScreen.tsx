@@ -137,7 +137,7 @@ const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }
           >
             <p className="text-sm font-semibold text-darkPurple">{item.title}</p>
             <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-lightPurpleBg px-3 py-1 text-xs font-semibold text-primaryPurple">
-              Score: {item.score}/1
+              {item.displayLabel ? item.displayLabel : `Score: ${item.score}/1`}
             </p>
             <p className="mt-2 text-sm text-grayText">{item.feedback}</p>
           </div>

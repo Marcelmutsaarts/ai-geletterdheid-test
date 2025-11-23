@@ -15,6 +15,7 @@ export type QuestionFeedback = {
   title: string;
   score: number; // 0-1 scale for radar
   feedback: string;
+  displayLabel?: string;
 };
 
 type ResultSummary = {
@@ -153,6 +154,7 @@ const App = () => {
         title: `Thema ${item.id} - ${item.theme}`,
         score: normalized,
         feedback: `${label} (gekozen: ${rating}/3)`,
+        displayLabel: `Inschaling: ${label} (${rating}/3)`,
       };
     });
     setFeedback(fb);
