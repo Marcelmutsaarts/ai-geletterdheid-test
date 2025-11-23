@@ -122,7 +122,7 @@ const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }
               <li key={item.id} className="flex items-center justify-between">
                 <span>{item.title}</span>
                 <span className="rounded-full bg-lightPurpleBg px-2 py-1 text-xs font-semibold text-primaryPurple">
-                  {item.score}/1
+                  {item.displayLabel ?? `Score: ${Math.round(item.score * 100)}%`}
                 </span>
               </li>
             ))}
@@ -138,7 +138,7 @@ const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }
           >
             <p className="text-sm font-semibold text-darkPurple">{item.title}</p>
             <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-lightPurpleBg px-3 py-1 text-xs font-semibold text-primaryPurple">
-              {item.displayLabel ? item.displayLabel : `Score: ${item.score}/1`}
+              {item.displayLabel ?? `Score: ${Math.round(item.score * 100)}%`}
             </p>
             <p className="mt-2 text-sm text-grayText">{item.feedback}</p>
           </div>
