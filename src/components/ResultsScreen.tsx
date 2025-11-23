@@ -6,6 +6,7 @@ type QuestionFeedback = {
   title: string;
   score: number;
   feedback: string;
+  displayLabel?: string;
 };
 
 interface ResultsScreenProps {
