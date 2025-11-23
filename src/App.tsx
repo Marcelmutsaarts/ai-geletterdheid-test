@@ -3,36 +3,59 @@ import { scoreAssessment, type GeminiResult } from './api/gemini';
 import LoadingScreen from './components/LoadingScreen';
 import QuestionFlow from './components/QuestionFlow';
 import ResultsScreen from './components/ResultsScreen';
+import SelfScanFlow from './components/SelfScanFlow';
 import WelcomeScreen from './components/WelcomeScreen';
 import { questions } from './data/questions';
+import { selfScanItems } from './data/selfScan';
 
-type Stage = 'welcome' | 'questions' | 'loading' | 'results';
+type Stage = 'welcome' | 'assessment' | 'selfscan' | 'loading' | 'results';
 
 export type QuestionFeedback = {
   id: number;
   title: string;
-  score: number;
+  score: number; // 0-1 scale for radar
   feedback: string;
+};
+
+type ResultSummary = {
+  totalScore: number;
+  recommendation: 'webinar' | 'advanced';
+  mode: 'assessment' | 'selfscan';
 };
 
 const App = () => {
   const [stage, setStage] = useState<Stage>('welcome');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [results, setResults] = useState<GeminiResult | null>(null);
+  const [selfScanScores, setSelfScanScores] = useState<Record<number, number>>({});
   const [feedback, setFeedback] = useState<QuestionFeedback[]>([]);
+  const [resultSummary, setResultSummary] = useState<ResultSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleStart = () => {
-    setStage('questions');
+  const handleStartAssessment = () => {
+    setStage('assessment');
     setCurrentIndex(0);
-    setResults(null);
+    setAnswers({});
     setFeedback([]);
+    setResultSummary(null);
+    setError(null);
+  };
+
+  const handleStartSelfScan = () => {
+    setStage('selfscan');
+    setCurrentIndex(0);
+    setSelfScanScores({});
+    setFeedback([]);
+    setResultSummary(null);
     setError(null);
   };
 
   const handleAnswer = (questionId: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleSelfScanAnswer = (id: number, value: number) => {
+    setSelfScanScores((prev) => ({ ...prev, [id]: value }));
   };
 
   const computeMcScores = () => {
@@ -85,7 +108,7 @@ const App = () => {
     const allAnswered = questions.every((q) => Boolean(answers[q.id]?.trim()));
     if (!allAnswered) {
       setError('Beantwoord alle vragen voordat je afrondt.');
-      setStage('questions');
+      setStage('assessment');
       return;
     }
 
@@ -96,32 +119,75 @@ const App = () => {
 
     try {
       const geminiResult = await scoreAssessment({ answers, mcScores, mcAnswerLabels });
-      setResults(geminiResult);
       setFeedback(buildFeedback(geminiResult, mcScores));
+      const recommendation = geminiResult.total_score >= 4 ? 'advanced' : 'webinar';
+      setResultSummary({
+        totalScore: geminiResult.total_score,
+        recommendation,
+        mode: 'assessment',
+      });
       setStage('results');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Er ging iets mis met de analyse. Probeer het opnieuw.';
       setError(message);
-      setStage('questions');
+      setStage('assessment');
     }
   };
 
-  const handleProceed = async () => {
-    if (stage !== 'questions') return;
+  const submitSelfScan = () => {
+    const allAnswered = selfScanItems.every((item) => typeof selfScanScores[item.id] === 'number');
+    if (!allAnswered) {
+      setError('Beantwoord alle stellingen om af te ronden.');
+      setStage('selfscan');
+      return;
+    }
+    setError(null);
+    const goodCount = selfScanItems.reduce((sum, item) => sum + (selfScanScores[item.id] === 3 ? 1 : 0), 0);
+    const recommendation = goodCount >= 4 ? 'advanced' : 'webinar';
+    const fb: QuestionFeedback[] = selfScanItems.map((item) => {
+      const rating = selfScanScores[item.id];
+      const normalized = Math.max(0, Math.min(1, rating / 3));
+      const label = rating === 3 ? 'Sterk' : rating === 2 ? 'Redelijk' : 'Beginner';
+      return {
+        id: item.id,
+        title: `Thema ${item.id} - ${item.theme}`,
+        score: normalized,
+        feedback: `${label} (gekozen: ${rating}/3)`,
+      };
+    });
+    setFeedback(fb);
+    setResultSummary({ totalScore: goodCount, recommendation, mode: 'selfscan' });
+    setStage('results');
+  };
+
+  const handleProceedAssessment = async () => {
+    if (stage !== 'assessment') return;
     const current = questions[currentIndex];
     if (!answers[current.id] || !answers[current.id].trim()) {
       setError('Beantwoord deze vraag om verder te gaan.');
       return;
     }
-
     setError(null);
-
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       return;
     }
-
     await submitAssessment();
+  };
+
+  const handleProceedSelfScan = () => {
+    if (stage !== 'selfscan') return;
+    const current = selfScanItems[currentIndex];
+    if (typeof selfScanScores[current.id] !== 'number') {
+      setError('Kies een score om verder te gaan.');
+      return;
+    }
+    setError(null);
+    if (currentIndex < selfScanItems.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      return;
+    }
+    submitSelfScan();
   };
 
   const handleBack = () => {
@@ -132,8 +198,9 @@ const App = () => {
 
   const handleRestart = () => {
     setAnswers({});
-    setResults(null);
+    setSelfScanScores({});
     setFeedback([]);
+    setResultSummary(null);
     setCurrentIndex(0);
     setError(null);
     setStage('welcome');
@@ -145,29 +212,52 @@ const App = () => {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-darkPurple">AI voor Docenten</p>
           <h1 className="text-2xl font-bold text-ink sm:text-3xl">AI-geletterdheid check</h1>
-          <p className="text-sm text-grayText">7 vragen. 7 minuten. Direct een advies.</p>
+          <p className="text-sm text-grayText">Kies AI-analyse of zelfscan. 7 thema’s. Direct een advies.</p>
         </div>
         <div className="rounded-full bg-white/80 px-4 py-2 text-xs font-semibold text-primaryPurple shadow-sm">
           Super dat je deze stap zet!
         </div>
       </div>
 
-      {stage === 'welcome' && <WelcomeScreen onStart={handleStart} />}
-      {stage === 'questions' && (
+      {stage === 'welcome' && (
+        <WelcomeScreen onStartAssessment={handleStartAssessment} onStartSelfScan={handleStartSelfScan} />
+      )}
+
+      {stage === 'assessment' && (
         <QuestionFlow
           questions={questions}
           currentIndex={currentIndex}
           answers={answers}
           onAnswer={handleAnswer}
           onBack={handleBack}
-          onProceed={handleProceed}
+          onProceed={handleProceedAssessment}
           isLast={currentIndex === questions.length - 1}
           error={error}
         />
       )}
+
+      {stage === 'selfscan' && (
+        <SelfScanFlow
+          currentIndex={currentIndex}
+          scores={selfScanScores}
+          onSelect={handleSelfScanAnswer}
+          onBack={handleBack}
+          onProceed={handleProceedSelfScan}
+          isLast={currentIndex === selfScanItems.length - 1}
+          error={error}
+        />
+      )}
+
       {stage === 'loading' && <LoadingScreen />}
-      {stage === 'results' && results && (
-        <ResultsScreen results={results} feedback={feedback} onRestart={handleRestart} />
+
+      {stage === 'results' && resultSummary && (
+        <ResultsScreen
+          totalScore={resultSummary.totalScore}
+          recommendation={resultSummary.recommendation}
+          feedback={feedback}
+          mode={resultSummary.mode}
+          onRestart={handleRestart}
+        />
       )}
     </main>
   );

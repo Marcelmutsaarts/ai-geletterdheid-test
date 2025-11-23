@@ -2,10 +2,11 @@ import { motion } from 'framer-motion';
 import Button from './Button';
 
 interface WelcomeScreenProps {
-  onStart: () => void;
+  onStartAssessment: () => void;
+  onStartSelfScan: () => void;
 }
 
-const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
+const WelcomeScreen = ({ onStartAssessment, onStartSelfScan }: WelcomeScreenProps) => {
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -22,8 +23,8 @@ const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
             Check je AI-geletterdheid in 7 minuten
           </h1>
           <p className="text-base text-grayText">
-            Zeven korte vragen over AI in het onderwijs. Je krijgt direct een advies: de webinarserie
-            of een advanced aanbod voor echte high-performers.
+            Kies hoe je wilt starten: laat Gemini je open antwoorden scoren óf doe een snelle zelfscan met
+            stellingen per thema. Je krijgt meteen advies: webinar-serie of verdieping.
           </p>
           <div className="flex flex-wrap gap-3 text-sm text-grayText">
             <span className="rounded-full bg-white px-3 py-2 font-semibold text-primaryPurple shadow-sm">
@@ -37,7 +38,8 @@ const WelcomeScreen = ({ onStart }: WelcomeScreenProps) => {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onStart}>Start de check</Button>
+            <Button onClick={onStartAssessment}>Start met AI-check</Button>
+            <Button variant="ghost" onClick={onStartSelfScan}>Doe de zelfscan</Button>
             <p className="text-sm text-darkPurple">Super dat je deze stap zet!</p>
           </div>
         </div>

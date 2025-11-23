@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import Button from './Button';
-import type { GeminiResult } from '../api/gemini';
 
 type QuestionFeedback = {
   id: number;
@@ -10,8 +9,10 @@ type QuestionFeedback = {
 };
 
 interface ResultsScreenProps {
-  results: GeminiResult;
+  totalScore: number;
+  recommendation: 'webinar' | 'advanced';
   feedback: QuestionFeedback[];
+  mode: 'assessment' | 'selfscan';
   onRestart: () => void;
 }
 
@@ -67,12 +68,17 @@ const SpiderChart = ({ feedback }: { feedback: QuestionFeedback[] }) => {
   );
 };
 
-const ResultsScreen = ({ results, feedback, onRestart }: ResultsScreenProps) => {
-  const advanced = results.total_score >= 4 || results.recommendation === 'advanced';
+const ResultsScreen = ({ totalScore, recommendation, feedback, mode, onRestart }: ResultsScreenProps) => {
+  const advanced = totalScore >= 4 || recommendation === 'advanced';
   const title = advanced ? 'Op naar verdieping!' : 'Aan de slag met de basis';
-  const message = advanced
-    ? 'Mooi werk. Je scoorde 4 of meer onderdelen goed. Kijk naar de gevorderde cursus of losse verdiepingsmodules.'
-    : 'Je scoorde 0-3 onderdelen goed. De webinar-serie helpt je om op alle thema’s stevig te worden.';
+  const message =
+    mode === 'assessment'
+      ? advanced
+        ? 'Mooi werk. Je AI-analyse laat 4 of meer sterke onderdelen zien. Kijk naar de gevorderde cursus of losse verdiepingsmodules.'
+        : 'Je AI-analyse laat 0-3 sterke onderdelen zien. De webinar-serie helpt je snel op alle thema’s op niveau te komen.'
+      : advanced
+        ? 'Sterke zelfinschatting: 4 of meer thema’s scoor je hoog. Bekijk de gevorderde cursus of losse modules.'
+        : 'Je zelfscan laat 0-3 sterke thema’s zien. De webinar-serie geeft je een stevig fundament.';
   const cta = advanced
     ? { text: 'Bekijk gevorderde cursus', href: '/advanced' }
     : { text: 'Volg de webinar-serie', href: '/webinars' };
@@ -88,7 +94,7 @@ const ResultsScreen = ({ results, feedback, onRestart }: ResultsScreenProps) => 
         <p className="text-sm font-semibold uppercase tracking-wide text-darkPurple">Advies</p>
         <h2 className="mt-2 text-3xl font-bold text-ink">{title}</h2>
         <p className="mt-3 max-w-3xl text-base text-grayText sm:text-lg">
-          {message} Totale score: {results.total_score}/7.
+          {message} Totale score: {totalScore}/7.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Button as="a" href={cta.href} target="_blank" rel="noreferrer">

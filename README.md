@@ -32,6 +32,7 @@ npm run build
 - `src/App.tsx` - state-machine voor fases: welcome -> vragen -> loading -> resultaten.
 - Model: `gemini-3-pro-preview` (kan aangepast worden in `src/api/gemini.ts`).
 - Advieslogica: 1-3 punten = webinar-serie, 4-7 punten = gevorderd traject/modules. Resultaat toont spinnenweb per thema.
+- Zelfscan: kies in het welkomstscherm; 7 stellingen (1-3), spinnenweb + advies zonder API-call.
 
 ## Styling
 - Tailwind met merk-kleuren (`tailwind.config.js`).
